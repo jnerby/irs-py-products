@@ -115,7 +115,7 @@ def search_by_form_titles(forms):
 
 def download_forms(form, years):
 # def download_forms(form, years):
-    """Downloads and saves forms"""
+    """Downloads and saves forms to a downloads folder in current working dir"""
     path = os.getcwd()+'/downloads'
 
     # Initialize first row to 0
