@@ -1,6 +1,7 @@
 import requests
 import json
 import os
+import sys
 from bs4 import BeautifulSoup
 
 def get_form_num(prod):

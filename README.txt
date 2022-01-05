@@ -1,7 +1,9 @@
-I used Python 3.8.9 to complete this challenge. I used Beautiful Soup for web scraping. Run "pip3 install -r requirements.txt" from the command line. Then run "python3 server.py."
+I used Python 3.8.9 to complete this challenge. I used Beautiful Soup for web scraping. 
+Run "pip3 install -r requirements.txt" from the command line.
+Then run "python3 -i function.py" from the command line to run Python interactively.
 
-This script has four helper functions and two primary functions. search_by_form_titles() is the function for Part 1, and download_forms() is the function for part 2. The first four functions (get_form_num(), get_title(), get_products(), and get_year()) are helper functions that parse data from irs.gov.
+1) To view summary data about a list of forms, run "print(search_by_form_titles([forms]))." For example, the command 
+"print(search_by_form_titles(['Form W-2', 'Publ 225']))" returns "[{"form_number": "Form W-2", "form_title": "Wage and Tax Statement (Info Copy Only)", "min_year": 1954, "max_year": 2022}, 
+{"form_number": "Publ 225", "form_title": "Farmer's Tax Guide", "min_year": 1994, "max_year": 2021}]."
 
-Parameters are passed to all six functions as arguments. I used json.dumps() to return a JSON string in Part 1.
-
-I enjoyed this challenge overall. I feel it gave me a chance to demonstrate a few different Python skills. I appreciated the clear, concise directions.
+2) To download forms from irs.gov, run "download_forms(form, years)." For example, the command "download_forms("Form W-2", [1990, 1995, 2000, 2005])" downloads four forms as PDFs to the downloads folder.
