@@ -1,4 +1,6 @@
-I used Python 3.8.9 to complete this challenge. I used Beautiful Soup for web scraping. 
+This project uses Python 3.8.9 and Beautiful Soup to scrape data from irs.gov's Prior Year Products page.
+https://apps.irs.gov/app/picklist/list/priorFormPublication.html?indexOfFirstRow=0&sortColumn=sortOrder&value=&criteria=&resultsPerPage=25&isDescending=false
+
 Run "pip3 install -r requirements.txt" from the command line.
 Then run "python3 -i function.py" from the command line to run Python interactively.
 
