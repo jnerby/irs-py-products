@@ -74,11 +74,7 @@ def get_products(url: str) -> list:
         soup = BeautifulSoup(res.content, "html.parser")
         # Get all table data based in leftmost column
         product_numbers = soup.find_all("td", class_="LeftCellSpacer")
-
         return product_numbers
-
-    ##### get_products not explicitly handling case for 200, raise exception if get_products does anything weird
-        #### consider writing test
     else:
         raiseExceptions('Not found')
 
@@ -109,16 +105,10 @@ def get_year(prod: str) -> int:
 
     return int(form_year)
 
-def get_product_data(form):
-    # Initialize empty dict for each form's results, vars for form name and title upon match
-    form_details = {}
-    form_num_for_dict = ''
-    form_title_for_dict = ''
-    # Initialize empty set for form_years. Get min and max for dict
-    all_form_years = set()
-
+def scrape_product_data(form):
     # Set index of first row to 0 to loop through all result pages
     url_first_row = 0
+    products = []
     # While loop to scrape all result pages (at least first 1000 results)
     while True:
         #### try making results per page bigger. maybe so many forms that not running infin but just long runtime
@@ -127,23 +117,35 @@ def get_product_data(form):
 
         # Generate dynamic URL to search for each form name and call get_products
         url = f"https://apps.irs.gov/app/picklist/list/priorFormPublication.html?indexOfFirstRow={str(url_first_row)}&sortColumn=sortOrder&value={form}&criteria=formNumber&resultsPerPage=200&isDescending=false"           
-        prods = get_products(url)
-        
-        # Loop through products
-        for prod in prods:
-            form_num = get_form_num(prod)
-            # Check form name matches passed in term exactly
-            if form_num == form:
-                # Update form number value for result dict
-                form_num_for_dict = form_num    
-                # Update form title value for result dict
-                form_title_for_dict = get_title(prod)
-                # Add form year to form_years set
-                year = get_year(prod)
-                all_form_years.add(year)
+        products.extend(get_products(url))
 
         # Increment first row to search next 200 results
         url_first_row += 200
+
+    return products
+
+def get_product_data(form):
+    # Initialize empty dict for each form's results, vars for form name and title upon match
+    form_details = {}
+    form_num_for_dict = ''
+    form_title_for_dict = ''
+    # Initialize empty set for form_years. Get min and max for dict
+    all_form_years = set()
+ 
+    products = scrape_product_data(form)
+
+    # Loop through products
+    for prod in products:
+        form_num = get_form_num(prod)
+        # Check form name matches passed in term exactly
+        if form_num == form:
+            # Update form number value for result dict
+            form_num_for_dict = form_num    
+            # Update form title value for result dict
+            form_title_for_dict = get_title(prod)
+            # Add form year to form_years set
+            year = get_year(prod)
+            all_form_years.add(year)
 
     # Generate dict for each form
     form_details = {
