@@ -1,20 +1,20 @@
 import requests
 import json
 import os
-import sys
+# import sys
 from bs4 import BeautifulSoup
 from logging import raiseExceptions
 
-def download_forms(form, years):
-# def download_forms(form, years):
+def download_forms(form: str, year_range: str):
     """Downloads and saves forms to a downloads folder in current working dir"""
     path = os.getcwd()+'/downloads'
 
+    years = get_form_years_from_year_range(year_range)
     # Initialize first row to 0
     url_first_row = 0
 
     while True:
-        if url_first_row > 1000:
+        if url_first_row > 30000:
             break
         
         # Get all products from url 
@@ -25,11 +25,42 @@ def download_forms(form, years):
         for product in products:
             generate_form_pdf(product, form, years)
 
-        # Check next 200 results
-        url_first_row += 200
+        # Check next 10000 results
+        url_first_row += 10000
 
 
-def generate_form_pdf(product, form, years):
+def get_form_years_from_year_range(year_range: str) -> list:
+    """Returns list of years that fall within requested range"""
+    # if no year range entered, return empty list
+    if not year_range:
+        return []
+
+    # split year ranget to min and max year
+    min_max_year = year_range.split("-")
+
+    # if min year entered incorrectly, return empty list
+    if len(min_max_year[0]) != 4:
+        return []
+    # if max year is entered, check if entered correctly
+    if len(min_max_year) == 2 and len(min_max_year[1]) != 4:
+        return []
+
+    # if user only entered one year
+    if len(min_max_year) == 1:
+        min_year = min_max_year[0]
+        years = [int(min_year)]
+    # if user entered year range correctly
+    elif len(min_max_year) == 2:
+        min_year = int(min_max_year[0])
+        max_year = int(min_max_year[1])
+        years = list(range(min_year, max_year + 1))
+    else:
+        return []
+
+    return years
+
+def generate_form_pdf(product: str, form: str, years: list):
+    """Generates and saves a PDF to local directory's downloads folder"""
     path = os.getcwd()+'/downloads'
 
     form_num = get_form_num(product)
@@ -38,8 +69,7 @@ def generate_form_pdf(product, form, years):
     if form_num == form:
         year = get_year(product)
         if year in years:
-            # generate_pdf(product, form_num, year)
-            # # Get file link
+            # Get file link
             file_url = product.find('a').get('href')
             # Generate file name
             file_name = os.path.join(path, f"{form_num} - {year}")
@@ -92,39 +122,8 @@ def get_title(prod: str) -> str:
 
     return form_title
 
-def get_year(prod: str) -> int:
-    """Return form year"""
-    # Get parent row for matches
-    tr = prod.parent
-    # Get right column to get form title
-    year_data = tr.find('td', class_="EndCellSpacer")
-    # Get contents of middle column
-    year_bytes = year_data.encode_contents()
-    # Decode to string
-    form_year = year_bytes.decode('utf-8')
-
-    return int(form_year)
-
-def scrape_product_data(form):
-    # Set index of first row to 0 to loop through all result pages
-    url_first_row = 0
-    products = []
-    # While loop to scrape all result pages (at least first 1000 results)
-    while True:
-        #### try making results per page bigger. maybe so many forms that not running infin but just long runtime
-        if url_first_row > 1000:
-            break
-
-        # Generate dynamic URL to search for each form name and call get_products
-        url = f"https://apps.irs.gov/app/picklist/list/priorFormPublication.html?indexOfFirstRow={str(url_first_row)}&sortColumn=sortOrder&value={form}&criteria=formNumber&resultsPerPage=200&isDescending=false"           
-        products.extend(get_products(url))
-
-        # Increment first row to search next 200 results
-        url_first_row += 200
-
-    return products
-
-def get_product_data(form):
+def get_product_data(form: str) -> dict:
+    """Returns dictionary with a single form's num, title, min and max year"""
     # Initialize empty dict for each form's results, vars for form name and title upon match
     form_details = {}
     form_num_for_dict = ''
@@ -146,6 +145,10 @@ def get_product_data(form):
             # Add form year to form_years set
             year = get_year(prod)
             all_form_years.add(year)
+            
+    # if no matches found, returns an empty dictionary
+    if len(all_form_years) == 0:
+        return {}
 
     # Generate dict for each form
     form_details = {
@@ -157,9 +160,40 @@ def get_product_data(form):
     
     return form_details
 
+def get_year(prod: str) -> int:
+    """Return form year"""
+    # Get parent row for matches
+    tr = prod.parent
+    # Get right column to get form title
+    year_data = tr.find('td', class_="EndCellSpacer")
+    # Get contents of middle column
+    year_bytes = year_data.encode_contents()
+    # Decode to string
+    form_year = year_bytes.decode('utf-8')
+
+    return int(form_year)
+
+def scrape_product_data(form: str) -> list:
+    """Returns list of products that match form number"""
+    # Set index of first row to 0 to loop through all result pages
+    url_first_row = 0
+    products = []
+    # While loop to scrape all result pages (at least first 30,000 results)
+    while True:
+        if url_first_row > 30000:
+            break
+
+        # Generate dynamic URL to search for each form name and call get_products
+        url = f"https://apps.irs.gov/app/picklist/list/priorFormPublication.html?indexOfFirstRow={str(url_first_row)}&sortColumn=sortOrder&value={form}&criteria=formNumber&resultsPerPage=200&isDescending=false"           
+        products.extend(get_products(url))
+
+        # Increment first row to search next 10,000 results
+        url_first_row += 10000
+
+    return products
+
 def search_by_form_titles(forms: list) -> json:
-    """Returns JSON object w/ form number, title, min and max year for forms in list
-    """
+    """Returns JSON object w/ form number, title, min and max year for forms in list"""
     # Initialize empty list to return with results from all forms
     result = []
 
@@ -170,7 +204,3 @@ def search_by_form_titles(forms: list) -> json:
 
     # Return result as JSON object
     return json.dumps(result)
-
-
-
-
