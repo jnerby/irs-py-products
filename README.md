@@ -12,4 +12,6 @@ This function assumes that there are no more than 30,000 files on the IRS's PY P
 
 2) To download forms from irs.gov, run "download_forms(form, years)." For example, the command "download_forms("Form W-2", "1990-1995")" downloads four forms as PDFs to the downloads folder.
 
-Given more time, I would implement more error handling and testing.
+3) Run "python3 test_functions.py" in your terminal to run unit tests.
+
+Given more time, I would implement more error handling and testing. I would add more detailed value errors or exceptions for invalid entries or entries that return no results. I would also potentially refactor this code to run from the command line, instead of running Python interactively.

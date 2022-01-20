@@ -1,7 +1,6 @@
 import requests
 import json
 import os
-# import sys
 from bs4 import BeautifulSoup
 from logging import raiseExceptions
 
@@ -14,7 +13,7 @@ def download_forms(form: str, year_range: str):
     url_first_row = 0
 
     while True:
-        if url_first_row > 30000:
+        if url_first_row > 25000:
             break
         
         # Get all products from url 
@@ -35,7 +34,7 @@ def get_form_years_from_year_range(year_range: str) -> list:
     if not year_range:
         return []
 
-    # split year ranget to min and max year
+    # split year range to min and max year
     min_max_year = year_range.split("-")
 
     # if min year entered incorrectly, return empty list
@@ -47,17 +46,15 @@ def get_form_years_from_year_range(year_range: str) -> list:
 
     # if user only entered one year
     if len(min_max_year) == 1:
-        min_year = min_max_year[0]
-        years = [int(min_year)]
+        return [int(min_max_year[0])]
     # if user entered year range correctly
     elif len(min_max_year) == 2:
         min_year = int(min_max_year[0])
         max_year = int(min_max_year[1])
-        years = list(range(min_year, max_year + 1))
+        return list(range(min_year, max_year + 1))
     else:
         return []
 
-    return years
 
 def generate_form_pdf(product: str, form: str, years: list):
     """Generates and saves a PDF to local directory's downloads folder"""
@@ -145,7 +142,7 @@ def get_product_data(form: str) -> dict:
             # Add form year to form_years set
             year = get_year(prod)
             all_form_years.add(year)
-            
+
     # if no matches found, returns an empty dictionary
     if len(all_form_years) == 0:
         return {}
