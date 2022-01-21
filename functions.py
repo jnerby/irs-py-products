@@ -1,10 +1,11 @@
 import json
 import os
-from helpers import generate_form_pdf, get_form_years_from_year_range, get_product_data, get_products
+from helpers import generate_form_pdf, get_form_years_from_year_range, get_path_from_form_name, get_product_data, get_products
 
 def download_forms(form: str, year_range: str):
     """Downloads and saves forms to a downloads folder in current working dir"""
-    path = os.getcwd()+'/downloads'
+    path = get_path_from_form_name(form)
+
 
     years = get_form_years_from_year_range(year_range)
     # Initialize first row to 0

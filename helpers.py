@@ -31,10 +31,18 @@ def get_form_years_from_year_range(year_range: str) -> list:
     else:
         return []
 
+def get_path_from_form_name(form: str) -> str:
+    """Returns path for directory with form name"""
+    current = os.getcwd()
+    new_dir = os.path.join(current, form)
+    if not os.path.exists(new_dir):
+        os.makedirs(new_dir)
+
+    return new_dir
 
 def generate_form_pdf(product: str, form: str, years: list):
     """Generates and saves a PDF to local directory's downloads folder"""
-    path = os.getcwd()+'/downloads'
+    path = get_path_from_form_name(form)
 
     form_num = get_form_num(product)
 
